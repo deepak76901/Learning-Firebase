@@ -7,14 +7,29 @@ export default function DetailsPage() {
   const params = useParams();
   const firebase = useFirebase();
   const [data, setData] = useState(null);
-  console.log(data);
+  const [imageUrl, setImageUrl] = useState(null)
+  console.log("Data ", data);
 
   useEffect(() => {
     firebase.getBookById(params.id).then((value) => setData(value.data()));
   }, [params]);
 
-  if(data === null) return <h2>Loading...</h2>;
-  return <div className="container">
-    <img src={data.imageURL} alt="Loading..." />
-  </div>;
+  useEffect(() => {
+    const getImage = async () => {
+      console.log("Fetching image");
+      const snapshot = await firebase.getImageUrl(data?.imageURL);
+      setImageUrl(snapshot)
+    };
+    if (data) {
+      getImage();
+    }
+  }, [data]);
+
+  if (!data) return <h3>Loading...</h3>;
+  return (
+    <div className="container">
+      <img src={imageUrl} alt="Loading..." loading="lazy" />
+      <p>{data.name}</p>
+    </div>
+  );
 }
